@@ -43,24 +43,37 @@ def create_charuco_board(
 IMAGE_PATH= Path("/Users/crosstyan/Downloads/IMG_1505.jpeg")
 
 def main():
-    ...
     img: MatLike
     img = cv2.imread(str(IMAGE_PATH))
     # 10x7
+    border_num_x = 10
+    border_num_y = 7
     # 115mm square
     # 90mm marker
     dictionary = ArucoDictionary.Dict_4X4_50
     predifined = aruco.getPredefinedDictionary(dictionary.value)
     # https://docs.opencv.org/4.x/d9/d6a/group__aruco.html#ga3bc50d61fe4db7bce8d26d56b5a6428a
     # https://docs.opencv.org/4.x/df/d4a/tutorial_charuco_detection.html
-    corners, ids, rejected = aruco.detectMarkers(img, predifined)
-    board = create_charuco_board(10, 7, 115, 90, predifined)
-    if ids is not None:
-        aruco.drawDetectedMarkers(img, corners, ids)
-        _, ch_corners, ch_ids =  aruco.interpolateCornersCharuco(corners, ids, img, board)
-        if ch_corners is not None and ch_ids is not None:
-            aruco.drawDetectedCornersCharuco(img, ch_corners, ch_ids)
-    cv2.imwrite("output.jpg", img)
+    # https://docs.opencv.org/3.4/df/d4a/tutorial_charuco_detection.html
+    # https://docs.opencv.org/4.x/dc/dbb/tutorial_py_calibration.html
+
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    ret, chess_corners = cv2.findChessboardCorners(gray, (border_num_x, border_num_y), None)
+    if ret:
+        cv2.drawChessboardCorners(img, (border_num_x, border_num_y), chess_corners, ret)
+        cv2.imwrite("output.jpg", img)
+    else:
+        print("not found")
+
+    # corners, ids, rejected = aruco.detectMarkers(img, predifined)
+    # board = create_charuco_board(10, 7, 115, 90, predifined)
+    # detector = aruco.CharucoDetector(board)
+    # if ids is not None:
+    #     aruco.drawDetectedMarkers(img, corners, ids)
+    #     _, ch_corners, ch_ids =  aruco.interpolateCornersCharuco(corners, ids, img, board)
+    #     if ch_corners is not None and ch_ids is not None:
+    #         aruco.drawDetectedCornersCharuco(img, ch_corners, ch_ids)
+    # cv2.imwrite("output.jpg", img)
     
 
 if __name__ == "__main__":
