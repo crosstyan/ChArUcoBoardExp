@@ -6,6 +6,8 @@ from enum import Enum
 from pathlib import Path
 from loguru import logger
 from itertools import chain
+from typing import Optional, TypedDict, cast
+import awkward as ak
 
 from matplotlib.pyplot import stem
 from numpy import ndarray
@@ -38,6 +40,14 @@ class ArucoDictionary(Enum):
 IMAGE_FOLDER = Path("xx")
 OUTPUT_FOLDER = Path("output")
 DICTIONARY = ArucoDictionary.Dict_4X4_50
+CALIBRATION_PARQUET: Optional[Path] = OUTPUT_FOLDER / "calibration.parquet"
+
+
+class CameraParams(TypedDict):
+    camera_matrix: MatLike
+    distortion_coefficients: MatLike
+    rotation_vectors: MatLike
+    translation_vectors: MatLike
 
 
 def main():
@@ -57,6 +67,18 @@ def main():
     all_image_points: list[MatLike] = []
     all_object_points: list[MatLike] = []
     last_shape = np.array((0, 0))
+    calibration: Optional[ak.Record] = None
+
+    def has_cal():
+        return CALIBRATION_PARQUET is not None and CALIBRATION_PARQUET.exists()
+
+    try:
+        if has_cal():
+            calibration_arr = ak.from_parquet(CALIBRATION_PARQUET)
+            calibration = calibration_arr[0]
+            logger.info(f"Loaded calibration parameters: {calibration}")
+    except Exception as e:
+        logger.error(f"Failed to load calibration parameters: {e}")
     for img_path in images:
         img = cv2.imread(str(img_path))
         last_shape = img.shape
@@ -82,6 +104,14 @@ def main():
             op, ip = board.matchImagePoints(ch_corners, ch_ids)  # type: ignore
             all_object_points.append(op)
             all_image_points.append(ip)
+            if calibration is not None:
+                mtx = cast(MatLike, ak.to_numpy(calibration["camera_matrix"]))
+                dist = cast(MatLike,ak.to_numpy(calibration["distortion_coefficients"]))
+                ret, rvec, tvec = cv2.solvePnP(op, ip, mtx, dist)
+                if ret:
+                    img = cv2.drawFrameAxes(img, mtx, dist, rvec, tvec, 0.1)
+                else:
+                    logger.warning(f"Failed to draw frame axes in {img_path}")
         else:
             logger.warning(f"Failed to detect Charuco board in {img_path}")
             continue
@@ -90,17 +120,25 @@ def main():
         output_path = OUTPUT_FOLDER / (f"{img_path.stem}_output.jpg")
         logger.info(f"Saving to {output_path}")
         cv2.imwrite(str(output_path), img)
-    if len(all_image_points) > 0:
+
+    # compute calibration
+    if calibration is None and len(all_image_points) > 0:
         ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(
-            all_object_points, all_image_points, last_shape[::-1], None, None
-        ) # type: ignore
+            all_object_points, all_image_points, (last_shape[0], last_shape[1]), None, None  # type: ignore
+        )  # type: ignore
         logger.info(f"Camera matrix: {mtx}")
         logger.info(f"Distortion coefficients: {dist}")
         logger.info(f"Rotation vectors: {rvecs}")
         logger.info(f"Translation vectors: {tvecs}")
-        np.save("camera_matrix.npy", mtx)
+        parameters = {
+            "camera_matrix": mtx,
+            "distortion_coefficients": dist,
+            "rotation_vectors": rvecs,
+            "translation_vectors": tvecs,
+        }
+        ak.to_parquet([parameters], OUTPUT_FOLDER / "calibration.parquet")
     else:
-        logger.warning("No Charuco board detected in any image")
+        logger.warning("no calibration data calculated; either no images or already calibrated")
 
 
 if __name__ == "__main__":
