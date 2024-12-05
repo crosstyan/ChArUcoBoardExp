@@ -37,7 +37,7 @@ class ArucoDictionary(Enum):
     Dict_ArUco_ORIGINAL = aruco.DICT_ARUCO_ORIGINAL
 
 
-IMAGE_FOLDER = Path("xx")
+IMAGE_FOLDER = Path("dumped/b")
 OUTPUT_FOLDER = Path("output")
 DICTIONARY = ArucoDictionary.Dict_4X4_50
 CALIBRATION_PARQUET: Optional[Path] = OUTPUT_FOLDER / "calibration.parquet"
