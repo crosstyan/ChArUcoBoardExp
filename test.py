@@ -6,7 +6,7 @@ from enum import Enum
 from pathlib import Path
 from loguru import logger
 from itertools import chain
-from typing import Optional, TypedDict, cast
+from typing import Optional, Sequence, TypedDict, cast
 import awkward as ak
 
 from matplotlib.pyplot import stem
@@ -94,6 +94,7 @@ def main():
         # https://docs.opencv.org/4.x/d9/d0c/group__calib3d.html#ga93efa9b0aa890de240ca32b11253dd4a
         # https://github.com/opencv/opencv/issues/22083
         # OpenCV 4.10.x
+        # pylint: disable-next=unpacking-non-sequence
         ch_corners, ch_ids, markers_corners, marker_ids = detector.detectBoard(img)
         # https://docs.opencv.org/4.10.0/d9/df5/classcv_1_1aruco_1_1CharucoDetector.html
         if ch_corners is not None:
@@ -101,12 +102,15 @@ def main():
             aruco.drawDetectedCornersCharuco(img, ch_corners, ch_ids, (0, 255, 0))
             all_ch_corners.append(ch_corners)
             all_ch_ids.append(ch_ids)
-            op, ip = board.matchImagePoints(ch_corners, ch_ids)  # type: ignore
+            # pylint: disable-next=unpacking-non-sequence
+            op, ip = board.matchImagePoints(cast(Sequence[MatLike], ch_corners), ch_ids)
             all_object_points.append(op)
             all_image_points.append(ip)
             if calibration is not None:
                 mtx = cast(MatLike, ak.to_numpy(calibration["camera_matrix"]))
-                dist = cast(MatLike,ak.to_numpy(calibration["distortion_coefficients"]))
+                dist = cast(
+                    MatLike, ak.to_numpy(calibration["distortion_coefficients"])
+                )
                 ret, rvec, tvec = cv2.solvePnP(op, ip, mtx, dist)
                 if ret:
                     img = cv2.drawFrameAxes(img, mtx, dist, rvec, tvec, 0.1)
@@ -138,7 +142,9 @@ def main():
         }
         ak.to_parquet([parameters], OUTPUT_FOLDER / "calibration.parquet")
     else:
-        logger.warning("no calibration data calculated; either no images or already calibrated")
+        logger.warning(
+            "no calibration data calculated; either no images or already calibrated"
+        )
 
 
 if __name__ == "__main__":
