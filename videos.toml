@@ -1,0 +1,39 @@
+[cameras.a]
+name = "three-four-right"
+videos = [
+    "video-20241206-161501.mp4",
+    "video-20241206-162615.mp4",
+    "video-20241206-163043.mp4",
+    "video-20241206-164116.mp4",
+    "video-20241206-164541.mp4",
+    "video-20241206-164956.mp4",
+]
+[cameras.b]
+name = "right"
+videos = [
+    "video-20241206-162045.mp4",
+    "video-20241206-163050.mp4",
+    "video-20241206-164124.mp4",
+    "video-20241206-164536.mp4",
+    "video-20241206-164952.mp4",
+    "video-20241206-165800.mp4",
+]
+[cameras.c]
+name = "bottom"
+videos = [
+    "video-20241206-162055.mp4",
+    "video-20241206-163037.mp4",
+    "video-20241206-164107.mp4",
+    "video-20241206-164548.mp4",
+    "video-20241206-165818.mp4",
+]
+[cameras.d]
+name = "hk"
+videos = [
+    "Video_20241206163609771.avi",
+    "Video_20241206164041621.avi",
+    "Video_20241206164534460.avi",
+    "Video_20241206165004982.avi",
+    "Video_20241206165831395.avi",
+]
+# https://superuser.com/questions/650291/how-to-get-video-duration-in-seconds

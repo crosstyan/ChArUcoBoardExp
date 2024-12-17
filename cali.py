@@ -37,10 +37,10 @@ class ArucoDictionary(Enum):
     Dict_ArUco_ORIGINAL = aruco.DICT_ARUCO_ORIGINAL
 
 
-IMAGE_FOLDER = Path("dumped/b")
+IMAGE_FOLDER = Path("dumped/usbcam")
 OUTPUT_FOLDER = Path("output")
 DICTIONARY = ArucoDictionary.Dict_4X4_50
-CALIBRATION_PARQUET: Optional[Path] = OUTPUT_FOLDER / "calibration.parquet"
+CALIBRATION_PARQUET: Optional[Path] = OUTPUT_FOLDER / "usbcam_cal.parquet"
 
 
 class CameraParams(TypedDict):
