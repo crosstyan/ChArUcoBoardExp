@@ -37,7 +37,7 @@ class ArucoDictionary(Enum):
     Dict_ArUco_ORIGINAL = aruco.DICT_ARUCO_ORIGINAL
 
 
-IMAGE_FOLDER = Path("dumped/usbcam")
+IMAGE_FOLDER = Path("dumped/cam")
 OUTPUT_FOLDER = Path("output")
 DICTIONARY = ArucoDictionary.Dict_4X4_50
 CALIBRATION_PARQUET: Optional[Path] = OUTPUT_FOLDER / "usbcam_cal.parquet"
@@ -140,7 +140,7 @@ def main():
             "rotation_vectors": rvecs,
             "translation_vectors": tvecs,
         }
-        ak.to_parquet([parameters], OUTPUT_FOLDER / "calibration.parquet")
+        ak.to_parquet([parameters], CALIBRATION_PARQUET)
     else:
         logger.warning(
             "no calibration data calculated; either no images or already calibrated"
