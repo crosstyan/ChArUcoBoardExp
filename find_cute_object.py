@@ -1,10 +1,9 @@
-import re
 import cv2
 from cv2 import aruco
 from datetime import datetime
 from loguru import logger
 from pathlib import Path
-from typing import cast, Final
+from typing import Optional, cast, Final
 import awkward as ak
 from cv2.typing import MatLike
 import numpy as np
@@ -42,6 +41,7 @@ def main():
     total_corners = cast(NDArray, ak.to_numpy(ops["corners"])).reshape(-1, 4, 3)
     ops_map: dict[int, NDArray] = dict(zip(total_ids, total_corners))
     logger.info("ops_map={}", ops_map)
+    writer: Optional[cv2.VideoWriter] = None
 
     for frame in gen():
         grey = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -123,6 +123,8 @@ def main():
                 else:
                     logger.warning("Failed to solvePnPRansac")
         cv2.imshow("frame", frame)
+        if writer is not None:
+            writer.write(frame)
         if (k := cv2.waitKey(1)) == ord("q"):
             logger.info("Exiting")
             break
@@ -131,6 +133,17 @@ def main():
             file_name = f"aruco_{now}.png"
             logger.info("Saving to {}", file_name)
             cv2.imwrite(file_name, frame)
+        elif k == ord("r"):
+            if writer is not None:
+                writer.release()
+                writer = None
+                logger.info("Recording stopped")
+            else:
+                now = datetime.now().strftime("%Y%m%d%H%M%S")
+                file_name = f"aruco_{now}.mp4"
+                logger.info("Recording to {}", file_name)
+                fourcc = cv2.VideoWriter.fourcc(*"mp4v")
+                writer = cv2.VideoWriter(file_name, fourcc, 20.0, frame.shape[:2][::-1])
 
 
 if __name__ == "__main__":
