@@ -9,9 +9,6 @@ from itertools import chain
 from typing import Optional, Sequence, TypedDict, cast
 import awkward as ak
 
-from matplotlib.pyplot import stem
-from numpy import ndarray
-
 
 class ArucoDictionary(Enum):
     Dict_4X4_50 = aruco.DICT_4X4_50
@@ -37,10 +34,10 @@ class ArucoDictionary(Enum):
     Dict_ArUco_ORIGINAL = aruco.DICT_ARUCO_ORIGINAL
 
 
-IMAGE_FOLDER = Path("dumped/batch_two/b")
+IMAGE_FOLDER = Path("dumped/batch_three/c")
 OUTPUT_FOLDER = Path("output")
 DICTIONARY = ArucoDictionary.Dict_4X4_50
-CALIBRATION_PARQUET: Optional[Path] = OUTPUT_FOLDER / "af_03.parquet"
+CALIBRATION_PARQUET: Optional[Path] = OUTPUT_FOLDER / "c-af_03.parquet"
 
 
 class CameraParams(TypedDict):

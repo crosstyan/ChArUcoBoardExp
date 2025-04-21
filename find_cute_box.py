@@ -10,9 +10,14 @@ import numpy as np
 
 NDArray = np.ndarray
 CALIBRATION_PARQUET = Path("output") / "usbcam_cal.parquet"
-DICTIONARY: Final[int] = aruco.DICT_4X4_50
+# 7x7
+DICTIONARY: Final[int] = aruco.DICT_7X7_1000
 # 400mm
 MARKER_LENGTH: Final[float] = 0.4
+RED = (0, 0, 255)
+GREEN = (0, 255, 0)
+BLUE = (255, 0, 0)
+YELLOW = (0, 255, 255)
 
 
 def gen():
@@ -47,23 +52,18 @@ def main():
             # logger.info("markers={}, ids={}", np.array(markers).shape, np.array(ids).shape)
             for m, i in zip(markers, ids):
                 center = np.mean(m, axis=0).astype(int)
-                GREY = (128, 128, 128)
                 logger.info("id={}, center={}", i, center)
-                cv2.circle(frame, tuple(center), 5, GREY, -1)
+                cv2.circle(frame, tuple(center), 5, RED, -1)
                 cv2.putText(
                     frame,
                     str(i),
                     tuple(center),
                     cv2.FONT_HERSHEY_SIMPLEX,
                     1,
-                    GREY,
+                    RED,
                     2,
                 )
                 # BGR
-                RED = (0, 0, 255)
-                GREEN = (0, 255, 0)
-                BLUE = (255, 0, 0)
-                YELLOW = (0, 255, 255)
                 color_map = [RED, GREEN, BLUE, YELLOW]
                 for color, corners in zip(color_map, m):
                     corners = corners.astype(int)
