@@ -1,5 +1,2 @@
 *.parquet filter=lfs diff=lfs merge=lfs -text
-charuco_400x400_3x3_s130_m100_no_24.pdf filter=lfs diff=lfs merge=lfs -text
-charuco_1189x841_10x7_s115_m90.pdf filter=lfs diff=lfs merge=lfs -text
-charuco_400x400_3x3_s130_m100_no_16.pdf filter=lfs diff=lfs merge=lfs -text
-charuco_400x400_3x3_s130_m100_no_20.pdf filter=lfs diff=lfs merge=lfs -text
+*.pdf filter=lfs diff=lfs merge=lfs -text
