@@ -1,19 +1,42 @@
-import cv2
-from cv2 import aruco
 from datetime import datetime
-from loguru import logger
 from pathlib import Path
-from typing import Optional, cast, Final
+from typing import Final, Optional, TypedDict, cast
+
 import awkward as ak
-from cv2.typing import MatLike
+import cv2
 import numpy as np
+from cv2 import aruco
+from cv2.typing import MatLike
+from jaxtyping import Int, Num
+from loguru import logger
 
 NDArray = np.ndarray
 CALIBRATION_PARQUET = Path("output") / "usbcam_cal.parquet"
-OBJECT_POINTS_PARQUET = Path("output") / "object_points.parquet"
+# OBJECT_POINTS_PARQUET = Path("output") / "object_points.parquet"
+OBJECT_POINTS_PARQUET = Path("output") / "standard_box_markers.parquet"
 DICTIONARY: Final[int] = aruco.DICT_4X4_50
 # 400mm
 MARKER_LENGTH: Final[float] = 0.4
+
+
+class MarkerFace(TypedDict):
+    """
+    for diamond ArUco markers, N is 4
+    """
+
+    name: str
+    """
+    a label for the face
+    """
+    ids: Int[NDArray, "N"]
+    """
+    ArUco marker ids
+    """
+    corners: Num[NDArray, "N 4 3"]
+    """
+    Corner coordinates in 3D of rectangle,
+    relative to the world origin
+    """
 
 
 def gen():
@@ -97,7 +120,7 @@ def main():
             if len(ops) > 0:
                 # https://docs.opencv.org/4.x/d5/d1f/calib3d_solvePnP.html
                 # https://docs.opencv.org/4.x/d5/d1f/calib3d_solvePnP.html#calib3d_solvePnP_flags
-                ret, rvec, tvec= cv2.solvePnP(
+                ret, rvec, tvec = cv2.solvePnP(
                     objectPoints=ops,
                     imagePoints=ips,
                     cameraMatrix=camera_matrix,
