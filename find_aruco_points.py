@@ -1,4 +1,5 @@
 import cv2
+import subprocess
 from cv2 import aruco
 from datetime import datetime
 from loguru import logger
@@ -9,9 +10,11 @@ from cv2.typing import MatLike
 import numpy as np
 
 NDArray = np.ndarray
-CALIBRATION_PARQUET = Path("output") / "usbcam_cal.parquet"
+# CALIBRATION_PARQUET = Path("output") / "usbcam_cal.parquet"
+CALIBRATION_PARQUET = None
 # 7x7
-DICTIONARY: Final[int] = aruco.DICT_7X7_1000
+# DICTIONARY: Final[int] = aruco.DICT_7X7_1000
+DICTIONARY: Final[int] = aruco.DICT_APRILTAG_36H11
 # 400mm
 MARKER_LENGTH: Final[float] = 0.4
 RED = (0, 0, 255)
@@ -33,9 +36,17 @@ def gen():
 
 def main():
     aruco_dict = aruco.getPredefinedDictionary(DICTIONARY)
-    cal = ak.from_parquet(CALIBRATION_PARQUET)[0]
-    camera_matrix = cast(MatLike, ak.to_numpy(cal["camera_matrix"]))
-    distortion_coefficients = cast(MatLike, ak.to_numpy(cal["distortion_coefficients"]))
+    cal = (
+        None if CALIBRATION_PARQUET is None else ak.from_parquet(CALIBRATION_PARQUET)[0]
+    )
+    camera_matrix = (
+        None if cal is None else cast(MatLike, ak.to_numpy(cal["camera_matrix"]))
+    )
+    distortion_coefficients = (
+        None
+        if cal is None
+        else cast(MatLike, ak.to_numpy(cal["distortion_coefficients"]))
+    )
     detector = aruco.ArucoDetector(
         dictionary=aruco_dict, detectorParams=aruco.DetectorParameters()
     )
@@ -52,7 +63,7 @@ def main():
             # logger.info("markers={}, ids={}", np.array(markers).shape, np.array(ids).shape)
             for m, i in zip(markers, ids):
                 center = np.mean(m, axis=0).astype(int)
-                logger.info("id={}, center={}", i, center)
+                # logger.info("id={}, center={}", i, center)
                 cv2.circle(frame, tuple(center), 5, RED, -1)
                 cv2.putText(
                     frame,
