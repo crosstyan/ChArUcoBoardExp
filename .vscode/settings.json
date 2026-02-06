@@ -1,6 +1,6 @@
 {
     "python.analysis.typeCheckingMode": "standard",
     "python.analysis.autoImportCompletions": true,
-    "python-envs.defaultEnvManager": "ms-python.python:system",
+    "python-envs.defaultEnvManager": "ms-python.python:uv",
     "python-envs.pythonProjects": []
 }
